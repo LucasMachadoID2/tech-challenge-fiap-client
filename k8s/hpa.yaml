@@ -1,18 +1,20 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: tech-chall-hpa
+  name: client-ms
+  labels:
+    app: client-ms
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: tech-chall-app
+    name: client-ms
   minReplicas: 1
-  maxReplicas: 5
+  maxReplicas: 3
   metrics:
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: 10
+          averageUtilization: 70

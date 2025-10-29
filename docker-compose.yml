@@ -3,22 +3,36 @@ services:
     image: mongo:7.0
     restart: always
     environment:
-      MONGO_INITDB_DATABASE: tech-chall
+      MONGO_INITDB_DATABASE: tech-fase4
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
     ports:
       - 27017:27017
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--username", "admin", "--password", "password", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   app:
     build: .
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
+    env_file:
+      - .env
     environment:
-      SPRING_DATA_MONGODB_HOST: mongodb
-      SPRING_DATA_MONGODB_PORT: 27017
-      SPRING_DATA_MONGODB_AUTHENTICATION_DATABASE: admin
-      SPRING_DATA_MONGODB_USERNAME: admin
-      SPRING_DATA_MONGODB_PASSWORD: password
-      SPRING_DATA_MONGODB_DATABASE: tech-chall
+      MONGODB_URI: ${MONGODB_URI}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
     ports:
       - 8080:8080
+    restart: always
+
+volumes:
+  mongo_data:
+  postgres_data:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:

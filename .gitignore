@@ -1,12 +1,21 @@
+### Maven ###
 target/
 !.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-.mvn/wrapper/maven-wrapper.jar
-src/main/resources/application-local.properties
-.env
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
 
-### STS ###
+### Segredos / configs locais ###
+.env
+src/main/resources/application-local.properties
+src/main/resources/application-local.yml
+src/main/resources/application-local.yaml
+
+### IDE - Eclipse / STS ###
 .apt_generated
 .classpath
 .factorypath
@@ -15,13 +24,16 @@ src/main/resources/application-local.properties
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
+### IDE - IntelliJ IDEA ###
 .idea
 *.iws
 *.iml
 *.ipr
 
-### NetBeans ###
+### IDE - VS Code ###
+.vscode/
+
+### IDE - NetBeans ###
 /nbproject/private/
 /nbbuild/
 /dist/
@@ -31,5 +43,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
-.vscode/
+### Logs e SO ###
+*.log
+.DS_Store
+Thumbs.db

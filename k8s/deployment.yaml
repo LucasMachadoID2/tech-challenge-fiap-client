@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-ms
+  labels:
+    app: client-ms
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: client-ms
+  template:
+    metadata:
+      labels:
+        app: client-ms
+    spec:
+      containers:
+        - name: client-ms
+          image: gabitriferreira/tech-fase4-client-microservice:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: client-ms-config
+            - secretRef:
+                name: client-ms-secrets
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

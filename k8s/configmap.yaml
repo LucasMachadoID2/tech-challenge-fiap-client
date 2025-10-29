@@ -1,8 +1,10 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: app-config
+  name: client-ms-config
+  labels:
+    app: client-ms
 data:
-  SPRING_DATA_MONGODB_HOST: mongodb
-  SPRING_DATA_MONGODB_PORT: "27017"
-  SPRING_DATA_MONGODB_DATABASE: tech-chall
+  SPRING_PROFILES_ACTIVE: "default"
+  LOGGING_LEVEL_ROOT: "INFO"
+  SERVER_PORT: "8080"

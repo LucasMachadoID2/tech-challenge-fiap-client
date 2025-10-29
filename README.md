@@ -1,236 +1,81 @@
-# 🧾 Tech Challenge - Sistema de Autoatendimento para Lanchonete
+# 🧾 Client Microservice - Tech Challenge
 
-Este repositório contém o backend do sistema de autoatendimento de fast food desenvolvido para o **Tech Challenge** (Fase 1 e Fase 2), que integra conhecimentos de todas as disciplinas da fase. O projeto endereça o problema de escalabilidade e organização de pedidos de uma lanchonete em expansão, evitando perda de pedidos, atrasos e inconsistências entre atendimento e cozinha.
+## 📖 Sobre o projeto
 
-Na **Fase 1** construímos um **monólito** seguindo **Arquitetura Hexagonal**, entregando as operações essenciais de cadastro de clientes, catálogo e fluxo inicial de pedidos com fila em banco.
-Na **Fase 2** evoluímos o código aplicando princípios de **Clean Code** e **Clean Architecture**, adicionando ordenação avançada da lista de pedidos, criação de webhook e desenho/infraestrutura em **Kubernetes** com HPA, ConfigMaps e Secrets.
-
-## Vídeo de Demonstração
-[![Assista ao vídeo](https://img.youtube.com/vi/FjibaGp5C4Y/0.jpg)](https://www.youtube.com/watch?v=FjibaGp5C4Y)
+O Client Microservice é o serviço de clientes do **Fast Food FIAP** para a fase 4 do Tech Challenge, implementado em Java 21 com Spring Boot 3, seguindo princípios de Arquitetura Hexagonal. Ele expõe operações REST para CRUD de clientes, valida dados de entrada, persiste em MongoDB e entrega contratos claros de erro.
 
 
-## Diferenças Principais entre Fase 1 e Fase 2
+## 📌 Estrutura de Endpoints do Microsserviço de Clientes
 
-- **Arquitetura**: de monólito hexagonal (Fase 1) para estrutura reorientada em camadas limpas (interfaces, application/use cases, domain, infrastructure) visando menor acoplamento.
-- **Webhook de pagamento**: tratamento explícito de aprovação/recusa para transicionar estado inicial do pedido.
-- **Lista de pedidos**: ordenação: (Pronto > Em Preparação > Recebido) e dentro de cada grupo, mais antigos primeiro; pedidos Finalizados excluídos da listagem ativa.
-- **Infra**: containerização já existente (Dockerfile + docker-compose) expandida para **manifestos Kubernetes** com Deployment, Service, HPA, ConfigMaps e Secrets.
-- **Documentação ampliada**: desenho de arquitetura + guia completo de execução + vídeo demonstrando infra e endpoints.
+| Método        | Endpoint              | Descrição                       |
+| --------------| ----------------------| --------------------------------|
+| GET           | /v1/clients           | Lista todos os clientes         |
+| GET           | /v1/clients/{id}      | Obtém um cliente pelo ID        |
+| POST          | /v1/clients           | Cria um novo cliente            |
+| PUT           | /v1/clients/{id}      | Atualiza os dados de um cliente |
+| DELETE        | /v1/clients/{id}      | Remove um cliente pelo ID       |
 
-## 📌 Objetivo
+## 🏛️ Arquitetura Hexagonal
 
-Criar uma aplicação de autoatendimento estilo fast-food que:
+### O que é?
 
-- Permita ao cliente realizar pedidos de forma autônoma.
-- Integre pagamento via QRCode utilizando **Mercado Pago**.
-- Acompanhe o status dos pedidos.
-- Forneça ao administrador funcionalidades de gerenciamento de produtos, categorias e clientes.
+A Arquitetura Hexagonal, também conhecida como Ports & Adapters, separa a lógica de negócio (Domínio) das preocupações externas (web, banco, mensageria, etc.). O objetivo é manter o núcleo da aplicação independente de frameworks, bancos de dados e interfaces, aumentando testabilidade, manutenção e evolução.
 
-## 📚 Requisitos de Negócio
+### Por que é uma boa escolha para microsserviços?
 
-### 🧑‍💼 Cliente (Autoatendimento)
+- Baixo acoplamento - facilita a substituição de tecnologias externas
+- Testabilidade - facilita a testabilidade da aplicação
+- Evolução segura - permite evolução do microsserviço sem afetar os demais
+- Manutenção - facilita a manutenção da aplicação
+- Flexibilidade/Isolamento - permite a adição de novas tecnologias externas sem afetar o núcleo da aplicação
 
-- Pode se identificar por CPF
-- Pode se cadastrar (nome, e-mail)
-- Pode continuar sem se identificar
+### Como está aplicada neste projeto?
 
-### Montagem do Pedido
+- Domínio - Regras centrais em domain/ (ex.: ClientEntity, normalização/validação de CPF, exceções).
+- Aplicação/Portas - Orquestração em application/ (ex.: ClientUseCase e ClientService), expondo portas de entrada e consumindo portas de saída.
+- Adapters In - Interface REST em adapters/in/ (ex.: ClientController, DTOs/mappers ClientInMapper, tratamento de erros adapters/in/exception/GlobalExceptionHandler).
+- Adapters Out - Persistência em adapters/out/ (ex.: ClientGatewayMongoAdapter implementa a porta de saída, MongoClientRepository do Spring Data, mapeador 
+ClientOutMapper).
 
-- Selecionar **Lanche** (nome, descrição, preço)
-- Selecionar **Acompanhamento** (nome, descrição, preço)
-- Selecionar **Bebida** (nome, descrição, preço)
+## ⚙️ Tecnologias utilizadas
 
-### Resumo e Confirmação do Pedido
-
-- Exibir os itens selecionados e o valor total antes de pagar
-
-### Pagamento
-
-- Integrado via **QRCode do Mercado Pago**
-
-### Acompanhamento do Pedido (pelo cliente)
-
-- Visualizar o status:
-  - Recebido
-  - Em preparação
-  - Pronto
-  - Finalizado
-
-### Notificação para Retirada
-
-- O cliente é notificado quando o pedido está pronto
-
-### 👨‍🍳 Cozinha
-
-- Visualizar pedidos recebidos
-- Atualizar o status do pedido:
-  - Em preparação
-  - Pronto
-  - Finalizado
-
-### 🛠️ Administrador (Painel de Gestão)
-
-- Cadastrar/editar/excluir produtos com:
-  - Nome
-  - Descrição
-  - Preço
-  - Imagem
-  - Categoria
-    - Lanche
-    - Acompanhamento
-    - Bebida
-    - Sobremesa
-
-### Gerenciar Categorias
-
-- Categorias:
-  - Lanche
-  - Acompanhamento
-  - Bebida
-  - Sobremesa
-
-### Acompanhar Pedidos em Tempo Real
-
-- Ver status atual dos pedidos
-- Ver tempo de espera por pedido
-
-## 🧩 Domínio
-
-<img src="./docs/Dominio.png" alt="Domínio"  width="800">
-
-## 📝 Domain Storytelling
-
-### Catálogos de produtos
-
-<img src="./docs/CatalogosProdutos.png" alt="Catálogos de produtos">
-
-### Pedido e montagem
-
-<img src="./docs/PedidoMontagem.png" alt="Pedido e montagem">
-
-### Campanhas promocionais
-
-<img src="./docs/CampanhasPromocionais.png" alt="Campanhas promocionais">
-
-## 💡 Event Storming
-
-Acesse nosso Miro para análise do processo: [Miro - Tech Challenge](https://miro.com/app/board/uXjVIGfJ2wI=/?share_link_id=33320449721)
-
-<img src="./docs/EventStorming.png" alt="Event Storming" width="800">
-
-## ⚙️ Tecnologias Utilizadas
-
-- **Java 21**
-- **Spring Boot**
-- **MongoDB**
-- **Mercado Pago SDK**
-- **Docker**
-- **Lombok**
-- **Kubernets**
-- **Mongock**
-
----
-
-### Documentação
-
-- **Swagger/OpenAPI** exposto em `/swagger-ui`.
-
-## 📁 Estrutura do Projeto
-
-- `api`: Camada responsavel por expor os endpoints da aplicação.
-- `controller`: Camada responsavel por distribuir as chamadas externas recebidas para os usecases.
-- `gateway`: Camada responsavel por interagir com a camada de repositories.
-- `usecase`: Camada responsavel por conter a regra da aplicação.
-- `entity`: Camadas responsavel por conter as regras de negocios da aplicação.
-- `adapter`: Camada responsavel por fazer adaptação dos dados entre camadas.
-- `data model`: ODMs da aplicação.
-- `infrastructure`: configurações da aplicação (ex: Mercado Pago).
-- `repositories`: Camada responsavel por fazer chamadas externas necessarias para determinadas regras da aplicação.
-- `webhook`: Camada responsavel por receber eventos do mundo externo.
-- `util`: enums, exceptions e conversores.
-- `k8s`: arquivos de configuração do Kubernetes.
-
-## 🏗️ Arquitetura da Solução
-
-### 🧱 Arquitetura Clean (controller, gateway, usecase, entity)
-
-O projeto adota a arquitetura clean para promover separação de responsabilidades, facilitar testes e permitir a substituição de tecnologias externas com baixo acoplamento e de forma limpa.
-
-- **Camada de entrada (API)**: Controladores REST responsáveis por receber requisições HTTP e convertê-las para os casos de uso da aplicação.
-- **Camada de distribuição de chamadas (controller)**: Classes responsaveis por distribuir as chamadas externas para seus devidos usecases.
-- **Camada de regras da aplicação (Use Cases)**: Contém a lógica central da aplicação.
-- **Camada de comunicação com o externo (Gateway)**: Classes responsaveis por distribuir em quais repositorios buscar os dados necessarios para o usecase.
-- **Camada de saída (Repository)**: Classes responsaveis por buscar dados externos.
-- **Banco de Dados**: MongoDB, utilizado para persistência dos dados de clientes, produtos, pedidos e pagamentos.
-- **Pagamento**: Integração com a API do Mercado Pago utilizando QRCode.
-- **Containers**: O MongoDB é executado em container Docker para facilitar o desenvolvimento e testes locais.
-```
-                      +-------------------------+
-                      |   Interface do Cliente  |
-                      |     (HTTP REST API)     |
-                      +------------+------------+
-                                   |
-                   +---------------v---------------+
-                   |        Camada de Entrada      |
-                   |         (API REST - API)      |
-                   +---------------+---------------+
-                                   |
-            +----------------------v----------------------+
-            | Camada de distribuição de responsabilidades |
-            |         (Controllers REST - API)            |
-            +----------------------+----------------------+
-                                   |
-                   +---------------v---------------+
-                   |       Casos de Uso (Core)     |
-                   |   Regras de Negócio e Fluxos  |
-                   +---------------+---------------+
-                                   |
-              +--------------------v--------------------+
-              |            Camada de Gateway            |
-              |   Chamada dos repositorios necessarios  |
-              +--------------------+--------------------+
-                                   |
-              +--------------------v--------------------+
-              |          Camada de Repository           |
-              |    Chamada externas para buscar dados   |
-              +--------------------+--------------------+
-                                   |
-               +-------------------+-------------------+
-               |                                       |
-       +-------v--------+                     +--------v--------+
-       | Banco de Dados |                     | Serviços Externos|
-       |   MongoDB      |                     |  Mercado Pago    |
-       +----------------+                     +------------------+
-   ```
-
-## 🧱 Arquitetura da infraestrutura
-
-<img src="./docs/k8s.gif" alt="Descrição do GIF" width="800">
+- Java 21: linguagem de programação moderna utilizada para implementar o microsserviço.
+- Spring Boot: framework Java para criação de aplicações web e APIs com convenções e auto-configuração.
+- Spring Web: módulo do Spring para construção de endpoints REST.
+- Spring Validation: validação de dados de entrada com anotações e Bean Validation.
+- Spring Data MongoDB: integração e acesso a dados em MongoDB de forma simplificada.
+- MongoDB: banco de dados NoSQL para persistência dos clientes.
+- Springdoc OpenAPI: geração de documentação OpenAPI/Swagger para a API.
+- JUnit 5: framework de testes unitários.
+- Mockito: biblioteca de mocks para isolar dependências nos testes.
+- Cucumber & Gherkin: ferramenta que segue a metodologia BDD (Behavior-Driven Development) para a escrita de testes de aceitação.
+- JaCoCo: ferramenta de cobertura de código.
+- SonarQube/SonarCloud: análise estática de código e quality gate.
+- Docker & Docker Compose: Ferramentas para containerização da aplicação e do banco de dados, facilitando o ambiente de desenvolvimento.
+- Kubernetes: Orquestrador de containers para deploy e gerenciamento da aplicação em um ambiente de produção.
+- GitHub Actions: automação de CI/CD.
 
 ## 🚀 Como Executar Localmente
 
 ### Pré-requisitos
 
-- Minikube
+- Java 21 (JDK): instalar e configurar JAVA_HOME.
+- Maven: para build e execução de testes (mvn clean verify).
+- Docker e Docker Compose: para containerização da aplicação e banco de dados.
+- Kubernetes: Um cluster para o deploy. Pode ser um cluster local como Minikube ou o Kubernetes integrado ao Docker Desktop.
+- kubectl: A ferramenta de linha de comando do Kubernetes, configurada para interagir com seu cluster.
 
 ### Passo a Passo
 
 1. **Clone o repositório**
 
    ```bash
-   git clone git@github.com:LucasMachadoID2/tech-challenge-fiap.git
-   cd tech-challenge-fiap
+   git clone git@github.com:LucasMachadoID2/tech-challenge-fiap-client.git
+   cd tech-challenge-fiap-client
 
    ```
 
-2. **Inicie o Minikube**
-
-   ```bash
-   minikube start --driver=docker
-
-   ```
-
-3. **Aplique os manifestos Kubernets**
+2. **Aplique os manifestos Kubernets**
 
    ```bash
    kubectl apply -f k8s/
@@ -250,60 +95,6 @@ O projeto adota a arquitetura clean para promover separação de responsabilidad
    http://localhost:8080/swagger-ui/index.html
    ```
 
-   ou execute o comando
-
-   ```bash
-   minikube service tech-chall-service
-   ```
-
-6. **Teste de Autoescalabilidade de Pods:**
-
-   ```bash
-   bash stress.sh 0.001 &
-   ```
-
-   Para o teste
-
-   ```bash
-   pkill -f stress.sh
-   ```
-
-<br>
-
-## 📫 Endpoints Principais
-
-**Clientes:**
-| Método | Endpoint | Descrição | Corpo (Request) |
-|--------|-----------------------|----------------------------------------|------------------------|
-| GET | `/v1/clients` | Listar todos os clientes | — |
-| POST | `/v1/clients` | Criar um cliente | `ClientRequestDto` |
-<br>
-
-**Produtos:**
-| Método | Endpoint | Descrição | Parâmetros / Corpo |
-|--------|-----------------------------------------|-------------------------------------------|-------------------------------|
-| GET | `/v1/products` | Listar todos os produtos | — |
-| GET | `/v1/products/category?category={category}` | Listar produtos por categoria | `category` (enum) |
-| POST | `/v1/products` | Criar um produto | `ProductRequestDto` |
-
-**Categorias (CategoryEnum)**: `LANCHE`, `ACOMPANHAMENTO`, `BEBIDA`, `SOBREMESA`.
-
-<br>
-
-**Pedidos:**
-| Método | Endpoint | Descrição | Parâmetros
-| ------ | --------------------------------------- | -------------------------- |--------------------------|
-| POST | `/v1/orders` | Criar um pedido | `OrderRequestDto` |
-| PATCH | `/v1/orders/{id}?status={status}` | Atualizar status do pedido | `status` (query param)|
-
-**Status de Pedido (OrderEntityStatusEnum)**: `CRIADO`, `RECEBIDO`, `EM PREPARAÇÃO`.
-<br>
-
-**Pagamentos:**
-| Método | Endpoint | Descrição |
-| ------ | -------------- | ----------------------------- |
-| PATCH | `/v1/payments` | Atualizar status do pagamento |
-| POST | `/v1/webhooks` | Webhook (Mercado Pago) para atualizar pedido pagamento do pedido |
 <br>
 
 ## 🙋‍♀️ Equipe
