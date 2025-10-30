@@ -20,12 +20,17 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
-
+      
       - name: Build
         run:  mvn -B clean compile
+      
+      - name: Test
+        run: mvn -B test
 
-      - name: Unit tests
-        run: mvn -B clean test
-
-      - name: Integration tests
-        run: mvn -B verify -DskipUnitTests
+      - name: Sonarqube
+        run: |
+          mvn -B sonar:sonar \
+          -Dsonar.projectKey=LucasMachadoID2_tech-challenge-fiap-client
+          -Dsonar.organization=lucasmachadoid2
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.token=${{ secrets.SONAR_TOKEN }}
