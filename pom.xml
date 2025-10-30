@@ -22,9 +22,7 @@
         <spring.version>3.4.4</spring.version>
 
         <!-- Configurações do SonarCloud -->
-        <sonar.organization>SEU_ORG_KEY</sonar.organization>
-        <sonar.projectKey>SEU_PROJECT_KEY</sonar.projectKey>
-        <sonar.projectName>tech-challenge-fiap</sonar.projectName>
+        <sonar.projectName>tech-challenge-fiap-client</sonar.projectName>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
         <!-- Diretórios de código e testes -->
