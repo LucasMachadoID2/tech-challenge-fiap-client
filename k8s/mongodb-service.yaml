@@ -4,7 +4,7 @@ metadata:
   name: app-client-database-mongo-service
 spec:
   selector:
-    app: app-client
+    app: app-client-database-mongo
   ports:
     - port: 27017
       targetPort: 27017
