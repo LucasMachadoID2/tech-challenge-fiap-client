@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: app-client-config
-data:
-  SPRING_DATA_MONGODB_URI: "mongodb://app-client-database-mongo:27017/tech-fase4"
-  SPRING_PROFILES_ACTIVE: "default"
-  LOGGING_LEVEL_ROOT: "INFO"
-  SERVER_PORT: "8080"
